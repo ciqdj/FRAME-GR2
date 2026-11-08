@@ -2,7 +2,7 @@ name: Auto Sync Fork
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # 北京时间每 6个小时 运行
+    - cron: '0 */6 * * *'  # 北京时间每6个小时运行
   workflow_dispatch:      # 允许手动点击按钮触发
 
 jobs:
