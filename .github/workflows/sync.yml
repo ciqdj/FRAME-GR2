@@ -2,22 +2,34 @@ name: Auto Sync Fork
 
 on:
   schedule:
-    # 每 6 小时自动运行一次（按 UTC 时间计算）
-    - cron: '0 */6 * * *'
-  # 允许手动触发执行
-  workflow_dispatch:
+    - cron: '0 16 * * *'  # 每天北京时间 00:00 运行
+  workflow_dispatch:      # 允许手动点击按钮触发
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout target repo
-        uses: actions/checkout@v4
+    
+    permissions:
+      contents: write # 必须赋予写入权限
 
-      - name: Sync Upstream
-        uses: repo-sync/github-sync@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          source_repo: "ahonn/GRKit"     # 原仓库相对路径
-          source_branch: "main"          # 原仓库主分支
-          destination_branch: "main"     # 你的 Fork 仓库主分支
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Pull upstream changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 添加上游仓库源（请确保这里的上游地址正确，根据你的主页显示，上游是 Lyle-xub/FRAME-GR2）
+          git remote add upstream https://github.com/Lyle-xub/FRAME-GR2.git
+          git fetch upstream
+          
+          # 切换并合并上游的 main 分支到你仓库的 main 分支
+          git checkout main
+          git merge upstream/main --allow-unrelated-histories || echo "Merge conflict or already up to date"
+          
+          # 推送到你的仓库
+          git push origin main
